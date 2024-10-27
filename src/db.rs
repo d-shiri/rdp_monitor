@@ -184,7 +184,7 @@ pub async fn fetch_live_data(verbose: bool ) -> Result<(), Box<dyn std::error::E
     }
 }
 
-pub async fn is_someone_connected() -> Result<bool>{
+pub async fn is_someone_connected(pc_num: i32) -> Result<bool, String>{
     let url = format!(
         "{}:{}/api/get_live_data",
         env::var("BACKEND_URL").expect("BACKEND_URL is not set in .env"),
@@ -194,18 +194,33 @@ pub async fn is_someone_connected() -> Result<bool>{
     let response = client
         .get(url)
         .send()
-        .await?;
+        .await
+        .expect("Failed to get response! | is_someone_connected");
     if response.status().is_success() {
         let data: Vec<LiveData> = response.json()
             .await.expect("Failed getting json data");
+        let mut connected = false;
+        for row in &data{
+            let remote_pc = row.remote_pc;
+            if pc_num == remote_pc {
+                connected = true;
+            } else {
+                connected = false;
+            }
+        }
+        Ok(connected)
+    } else {
+        Err(format!("Don't know if is_someone_connected to IFOS-TE{})\n{}", response.status(), pc_num))
     }
 }
 
-pub async fn fetch_user_history(day: i32) -> Result<(), Box<dyn std::error::Error>>{
-    let user_id = match get_user_id() {
+pub async fn fetch_user_history(day: i32, other_user: Option<&str>) -> Result<(), Box<dyn std::error::Error>>{
+
+    let my_user_id = match get_user_id() {
         Ok(id) => id,
         Err(_) => "Failed to get user_id".to_string(),
     };
+    let user_id = other_user.unwrap_or(&my_user_id);
     let url = format!(
         "{}:{}/api/get_user_history?id={}&day={}",
         env::var("BACKEND_URL").expect("BACKEND_URL is not set in .env"),
@@ -292,6 +307,7 @@ pub async fn insert_data(pc_num: i32)  -> Result<String, String> {
     if respond.status().is_success(){
         Ok(user_data.rdp_start_time.clone())
     } else {
+        println!("user_data:\n{:?}", user_data_json);
         Err(format!("Inserting data failed!\n{}", respond.status()))
     }
 }

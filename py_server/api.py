@@ -100,11 +100,16 @@ def get_live_data():
         conn = get_pool().get_connection()
         cursor = conn.cursor(dictionary=True)
         query = """
-            SELECT full_name, remote_pc 
-            FROM Users 
-            INNER JOIN UserData on Users.id = UserData.user_id 
-            WHERE rdp_start_time = rdp_end_time
-            AND rdp_start_time >= NOW() - INTERVAL 12 HOUR;
+            SELECT u.full_name, ud.remote_pc
+            FROM Users u
+            INNER JOIN UserData ud ON u.id = ud.user_id
+            INNER JOIN (
+                SELECT remote_pc, MAX(rdp_start_time) AS max_start_time
+                FROM UserData
+                WHERE rdp_start_time >= NOW() - INTERVAL 12 HOUR
+                GROUP BY remote_pc
+            ) latest ON ud.remote_pc = latest.remote_pc AND ud.rdp_start_time = latest.max_start_time
+            WHERE ud.rdp_start_time = ud.rdp_end_time;
         """
         cursor.execute(query)
         rows = cursor.fetchall()

@@ -53,7 +53,7 @@ pub fn color_print(sentence: &str, color: &str) {
     for c in sentence.chars() {
         print!("{}{}", color_code, c);
         stdout().flush().unwrap();
-        sleep(Duration::from_millis(20));
+        sleep(Duration::from_millis(7));
     }
     print!("{}\n", reset);
 }

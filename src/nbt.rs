@@ -1,10 +1,10 @@
 use clap::{CommandFactory, Parser, ValueEnum};
 use crate::general::{color_print, mailto_qr_gen};
+use std::str::FromStr;
 
 #[derive(Parser)]
 #[command(arg_required_else_help(true))]
 pub struct NBT {
-
     #[arg(
         short = 'r',
         long,
@@ -34,6 +34,14 @@ pub struct NBT {
         help = "Access live data to monitor your connection and others to IFOS machines.\n(e.g., nct -l or nct --live)"
     )]
     pub get_live_ui: bool,
+
+    #[arg(
+        short,
+        long,
+        value_name = "USERNAME DAY",
+        help = "Get other users' history. You can use this only if you have admin access.\n(e.g.,nct -a username day or nct --admin username day)",
+    )]
+    pub other_user_history: Option<OtherUserHistory>,
 }
 impl NBT {
     pub fn new() -> Self {
@@ -58,4 +66,28 @@ pub enum RDPUserInput {
     TESTRUNNER,
     FetchData,
     UserHistory,
+    OtherUserHistory
 }
+
+#[derive(Debug, Clone)]
+pub struct OtherUserHistory {
+    pub username: String,
+    pub days: i32,
+}
+
+impl FromStr for OtherUserHistory {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split_whitespace().collect();
+        if parts.len() != 2 {
+            return Err("Expected two arguments: username and day".to_string());
+        }
+
+        let username = parts[0].to_string();
+        let days = parts[1].parse::<i32>().map_err(|_| "Invalid number for day".to_string())?;
+
+        Ok(OtherUserHistory { username, days })
+    }
+}
+
