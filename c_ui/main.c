@@ -8,7 +8,7 @@
 // #endif
 
 int main(void) {
-    //SetTraceLogLevel(LOG_NONE);
+    SetTraceLogLevel(LOG_NONE);
     // get live data at the beginning
     system("nct.exe --get-live-ui");
     int screenWidth = 1200;
@@ -23,7 +23,7 @@ int main(void) {
     // consts for circle around profile 
     float profileCircleRotation = 0.0f;
     // count down
-    int startTime = 10;
+    int startTime = 60;
     int currentTime = startTime;
     double timer = 0.0;
     // button
@@ -32,7 +32,7 @@ int main(void) {
     bool isButtonClicked = false;
 
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
-    InitWindow(screenWidth, screenHeight, "Connections to IFOS Machines");
+    InitWindow(screenWidth, screenHeight, "Connections to Remote Machines");
 
     // load window icon
     Image icon = LoadImage("src/cp2.png");
@@ -205,7 +205,6 @@ int main(void) {
     free(endPoints);
     free(moveStartPoint);
     free(moveEndPoint);
-    printf("For feedback: dshiri404@gmail.com");
     // Unload the textures
     UnloadTexture(bg);
     UnloadTexture(pcTexture);

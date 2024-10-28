@@ -4,9 +4,10 @@ use nct::general::{color_print, create_folder, welcome};
 use nct::remote_server::RemoteServer;
 use nct::{db::fetch_user_history, nbt::NBT, remote_server::get_pc_num};
 use std::io::{self, Write};
+use std::process::{Command, Stdio};
+use std::{env, thread};
 use dotenv::dotenv;
 use atty::Stream;
-use tokio::signal::ctrl_c;
 
 #[tokio::main]
 async fn main() {
@@ -29,18 +30,24 @@ async fn main() {
     user_auth().await;
     let args: NBT = NBT::new();
     let mut tasks = vec![];
-    let mut rdp_active = false;
+
+    static mut RDP_ACTIVE: bool = false;
 
     if args.rdp {
-        let task_free = tasks.is_empty();
+
         welcome();
         ctrlc::set_handler(move || {
-            color_print("\rExiting NBT CLI Tool ...            ", "yellow");
-            if !rdp_active && task_free {
-                std::process::exit(0);
-            } else {
-                color_print("RDP session is active. Please close it before exiting.", "red");
+            unsafe {
+                if RDP_ACTIVE == false {
+                    color_print("\rExiting NBT CLI Tool ...            ", "yellow");
+                    
+                    std::process::exit(0);
+                } else {
+                    color_print("\nRDP session is active. Please close it before exiting.", "red");
+                    thread::yield_now();
+                }
             }
+
         })
         .expect("Error Setting Ctrl+C handler!");
         color_print("Press Ctrl+C to break", "cyan");
@@ -50,6 +57,14 @@ async fn main() {
                 Ok(connected) => {
                     if connected{
                         color_print(&format!("WARNING! Someone is already connected to IFOS-TE-{}", pc_num), "red");
+                        let current_dir = env::current_dir().expect("Faild to get the current dir!");
+                        let ui_path = current_dir.join("ui.exe");
+                        let _ = Command::new(ui_path)
+                            .stdin(Stdio::null())  // Optional: Prevents the child process from inheriting input
+                            .stdout(Stdio::null())  // Optional: Prevents output from being printed to console
+                            .stderr(Stdio::null())  // Optional: Prevents error messages from being printed to console
+                            .spawn()
+                            .expect("Failed to execute the process!");
                         print!("Do you want to kick 'em out and connect anyway? (y/N): ");
                         io::stdout().flush().unwrap();
                         let mut user_input = String::new();
@@ -61,12 +76,13 @@ async fn main() {
                             let remote_server = RemoteServer::new(pc_num);
                             remote_server.set_credentials();
                             let start_time = insert_data(pc_num).await.unwrap();
-                            rdp_active = true;
+                            unsafe {RDP_ACTIVE = true;}
                             // Spawn each connection attempt as a separate task
                             let task = tokio::spawn(async move {
                                 remote_server
                                     .open_remote_desktop(&start_time)
                                     .await;
+                                unsafe {RDP_ACTIVE = false;}
                             });
                             tasks.push(task);
                         }
@@ -74,12 +90,14 @@ async fn main() {
                         let remote_server = RemoteServer::new(pc_num);
                         remote_server.set_credentials();
                         let start_time = insert_data(pc_num).await.unwrap();
-                        rdp_active = true;
+                        unsafe {RDP_ACTIVE = true;}
                         // Spawn each connection attempt as a separate task
                         let task = tokio::spawn(async move {
                             remote_server
                                 .open_remote_desktop(&start_time)
                                 .await;
+                            unsafe {RDP_ACTIVE = false;}
+
                         });
                         tasks.push(task);
                     }
@@ -89,19 +107,6 @@ async fn main() {
                 }
                 
             }
-        // Listen for Ctrl+C signal
-    //     if ctrl_c().await.is_ok() {
-    //         if rdp_active {
-    //             color_print("RDP session is active. Please close it before exiting.", "red");
-    //         } else {
-    //             color_print("\rExiting NBT CLI Tool ...            ", "yellow");
-    //             break; 
-    //         }
-    //     }
-    // }
-    //     // Await completion of all tasks
-    //     for task in tasks {
-    //         let _ = task.await; // Handle task completion
         }
     }
 

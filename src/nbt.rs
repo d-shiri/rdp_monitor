@@ -9,7 +9,7 @@ pub struct NBT {
         short = 'r',
         long,
         value_name = "REMOTE",
-        help = "Specify the IFOS device number when asked.\n(e.g., nct -r or nct --live)"
+        help = "Specify the IFOS device number when asked.\n(e.g., nct -r or nct --rdp)"
     )]
     pub rdp: bool,
 
@@ -31,7 +31,7 @@ pub struct NBT {
     #[arg(
         short,
         long,
-        help = "Access live data to monitor your connection and others to IFOS machines.\n(e.g., nct -l or nct --live)"
+        help = "Access live data to monitor your connection and others to IFOS machines.\n(i.e., This is used in ui.exe)"
     )]
     pub get_live_ui: bool,
 
@@ -39,7 +39,7 @@ pub struct NBT {
         short,
         long,
         value_name = "USERNAME DAY",
-        help = "Get other users' history. You can use this only if you have admin access.\n(e.g.,nct -a username day or nct --admin username day)",
+        help = "Get other users' history. You can use this only if you have admin access.\n(e.g.,nct -o \"username day\" or nct --other_user_history \"username day\")",
     )]
     pub other_user_history: Option<OtherUserHistory>,
 }

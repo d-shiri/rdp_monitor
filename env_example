@@ -1,0 +1,6 @@
+BACKEND_URL=http://sub.example.com
+BACKEND_PORT=5000
+REMOTE_SERVER_PRE=your_pre_server_address
+REMOTE_SERVER_POST=.your_post_server_address
+REMOTE_USERNAME=Domain\\Username
+REMOTE_PASS=your_remote_pass

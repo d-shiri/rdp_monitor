@@ -35,6 +35,10 @@ pub struct UserData {
     pub rdp_end_time: String,   // DateTime<Utc>
 }
 
+#[derive(Deserialize)]
+struct IsUserAdmin {
+    admin: i32,
+}
 pub async fn create_new_user(user_id: &str)-> Result<(), Box<dyn std::error::Error>> {
     let url = format!(
         "{}:{}/api/create_user",
@@ -86,6 +90,27 @@ async fn user_exists(user_id: &str)-> Result<bool, Box<dyn std::error::Error>> {
         true => Ok(true),
         false => Err("User Not Found!".into()),
     }
+}
+
+async fn is_user_admin(user_id: &str)-> Result<bool, Box<dyn std::error::Error>> {
+    let url = format!(
+        "{}:{}/api/get_user_info?id={}",
+        env::var("BACKEND_URL").expect("BACKEND_URL is not set in .env"),
+        env::var("BACKEND_PORT").expect("BACKEND_PORT is not set in .env"),
+        user_id.to_string()
+    );
+    let client = Client::new();
+    let response = client
+        .get(url)
+        .send()
+        .await?;
+    if response.status().is_success() {
+        let user_info: Vec<IsUserAdmin> = response.json().await?;
+        if let Some(user) = user_info.get(0) {
+            return Ok(user.admin == 1)
+        }
+    }
+    Ok(false)
 }
 
 pub async fn user_auth() {
@@ -215,11 +240,27 @@ pub async fn is_someone_connected(pc_num: i32) -> Result<bool, String>{
 }
 
 pub async fn fetch_user_history(day: i32, other_user: Option<&str>) -> Result<(), Box<dyn std::error::Error>>{
-
     let my_user_id = match get_user_id() {
         Ok(id) => id,
         Err(_) => "Failed to get user_id".to_string(),
     };
+    if let Some(user) = other_user{
+        match is_user_admin(&my_user_id).await {
+            Ok(is_admin) => {
+                if is_admin {
+                    color_print("Access granted.", "green");
+                    color_print(&format!("Fetching history for user: {}", user), "green");
+
+                } else {
+                    color_print("Admin access needed to complete the request!", "red");
+                    return Err("Could not fetch user history! access denied!".into())
+                }
+            }
+            Err(e) => {
+                eprintln!("Error checking user admin status: {}", e);
+            }
+        }
+    }
     let user_id = other_user.unwrap_or(&my_user_id);
     let url = format!(
         "{}:{}/api/get_user_history?id={}&day={}",
@@ -237,7 +278,7 @@ pub async fn fetch_user_history(day: i32, other_user: Option<&str>) -> Result<()
     if response.status().is_success() {
         let data: Vec<UserHistory> = response.json()
             .await.expect("Failed getting json data - user history");
-        let file_path = format!("{}.csv", "user_history");
+        let file_path = format!("{}_{}.csv", "user_history", user_id);
         let mut wtr = Writer::from_path(&file_path)?;
         wtr.write_record(&["user_id", "remote_pc", "rdp_start_time", "rdp_end_time"])?;
         for row in &data {
