@@ -9,14 +9,14 @@ pub struct NBT {
         short = 'r',
         long,
         value_name = "REMOTE",
-        help = "Specify the IFOS device number when asked.\n(e.g., nct -r or nct --rdp)"
+        help = "Specify the remote device number when asked.\n(e.g., nct -r or nct --rdp)"
     )]
     pub rdp: bool,
 
     #[arg(
         short,
         long,
-        help = "Access live data to monitor your connection and others to IFOS machines.\n(e.g., nct -l or nct --live)"
+        help = "Access live data to monitor your connection and others to remote machines.\n(e.g., nct -l or nct --live)"
     )]
     pub live: bool,
 
@@ -31,7 +31,7 @@ pub struct NBT {
     #[arg(
         short,
         long,
-        help = "Access live data to monitor your connection and others to IFOS machines.\n(i.e., This is used in ui.exe)"
+        help = "Access live data to monitor your connection and others to remote machines.\n(i.e., This is used in ui.exe)"
     )]
     pub get_live_ui: bool,
 

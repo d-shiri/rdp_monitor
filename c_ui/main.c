@@ -161,7 +161,7 @@ int main(void) {
         BeginDrawing();
             ClearBackground(BLACK);
             DrawTexture(bg, 0, 0, WHITE);
-            DrawText("See who is connected to which IFOS machines", 15, 20, 20, GRAY);
+            DrawText("See who is connected to which remote machines", 15, 20, 20, GRAY);
             // Button
             DrawButton(&refreshButton);
             // Draw the loader when the button is clicked

@@ -27,6 +27,7 @@ Ensure you have **CMake** and **Raylib** installed on your machine. If needed, a
 ## Usage
 Before running the application, ensure you have a .env file in the same directory as nct.exe.
 
+- Put py_server folder on your linux server, create python virtual environment for it and run once to make sure the database tables are created. 
 - Refer to env_example for guidance on the format of the .env file.
 See `env_example` to see the `.env` format.
 To see how to use the tool, execute:

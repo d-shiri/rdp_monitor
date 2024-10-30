@@ -45,6 +45,7 @@ async fn main() {
                 } else {
                     color_print("\nRDP session is active. Please close it before exiting.", "red");
                     thread::yield_now();
+
                 }
             }
 
@@ -56,7 +57,7 @@ async fn main() {
             match is_someone_connected(pc_num).await{
                 Ok(connected) => {
                     if connected{
-                        color_print(&format!("WARNING! Someone is already connected to IFOS-TE-{}", pc_num), "red");
+                        color_print(&format!("WARNING! Someone is already connected to IFOS-TE{}", pc_num), "red");
                         let current_dir = env::current_dir().expect("Faild to get the current dir!");
                         let ui_path = current_dir.join("ui.exe");
                         let _ = Command::new(ui_path)
