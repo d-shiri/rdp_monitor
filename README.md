@@ -24,6 +24,10 @@ Ensure you have **CMake** and **Raylib** installed on your machine. If needed, a
 2. Run `build.ps1` and it will build and copy everything to `output_bins` to be used.
 
 
+## Download
+You can download the executables from [assets/bins.zip](./assets/bins.zip).
+
+
 ## Usage
 Before running the application, ensure you have a .env file in the same directory as nct.exe.
 
