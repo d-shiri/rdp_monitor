@@ -139,7 +139,7 @@ pub fn create_folder(foldername: &str) {
 
 
 pub fn mailto_qr_gen(){
-    let recipient = "dariush.shiri@gmail.com";
+    let recipient = "dariyoush.shiri@gmail.com";
     let subject = "RDP_Monitor Related";
     let body = "Hello there!\n\n";
     let mailto_uri = format!("mailto:{}?subject={}&body={}", recipient, subject, body);
