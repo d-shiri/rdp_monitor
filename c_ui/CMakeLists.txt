@@ -5,8 +5,11 @@ project(RDP_Monitor_UI C)
 set(exe "ui")
 
 # Specify the raylib include and library directories
-include_directories("C:/code_exp/rust/rdp_monitor/c_ui/raylib/build/raylib/include")
-set(RAYLIB_LIB "C:/code_exp/rust/rdp_monitor/c_ui/raylib/build/raylib/Release/raylib.lib")
+# Change the following dirs according to your paths
+include_directories("${PROJECT_SOURCE_DIR}/raylib/build/raylib/include")
+# include_directories("C:/code_exp/rust/rdp_monitor/c_ui/raylib/build/raylib/include")
+# set(RAYLIB_LIB "C:/code_exp/rust/rdp_monitor/c_ui/raylib/build/raylib/Release/raylib.lib")
+set(RAYLIB_LIB "${PROJECT_SOURCE_DIR}/raylib/build/raylib/Release/raylib.lib")
 
 # Add the source files
 set(SOURCES main.c funcs.c)
