@@ -43,9 +43,12 @@ if(Test-Path $OUTPUT_ZIP){
 Compress-Archive -Path "$OUTPUT_DIR\*" -DestinationPath $OUTPUT_ZIP
 
 if($?){
+    if(Test-Path "$ASSETS_DIR\$OUTPUT_ZIP"){
+        Remove-Item "$ASSETS_DIR\$OUTPUT_ZIP" -Force
+        Remove-Item "$ASSETS_DIR\bins.zip" -Force
+    }
     Copy-Item -Path $OUTPUT_ZIP -Destination $ASSETS_DIR
     Rename-Item "$ASSETS_DIR\$OUTPUT_ZIP" "$ASSETS_DIR\bins.zip"
-
 }
 
 if($?){

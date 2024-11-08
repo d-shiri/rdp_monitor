@@ -54,7 +54,9 @@ async fn main() {
             match is_someone_connected(pc_num).await{
                 Ok(connected) => {
                     if connected{
-                        color_print(&format!("WARNING! Someone is already connected to IFOS-TE{}", pc_num), "red");
+                        let remote_pre = env::var("Remote_SERVER_PREFIX")
+                            .expect("Remote_SERVER_PREFIX is not set in .env");
+                        color_print(&format!("WARNING! Someone is already connected to {}{}", remote_pre, pc_num), "red");
                         let current_dir = env::current_dir().expect("Faild to get the current dir!");
                         let ui_path = current_dir.join("ui.exe");
                         let _ = Command::new(ui_path)
@@ -70,7 +72,7 @@ async fn main() {
                             .expect("Sth went wrong while reading user input");
                         let input = user_input.trim().to_lowercase();
                         if input == "yes" || input == "y" {
-                            println!("IFOS-TE{}'s user kicked out! 😁\n", pc_num);
+                            println!("The user kicked out! 😁\n");
                             let remote_server = RemoteServer::new(pc_num);
                             remote_server.set_credentials();
                             let start_time = insert_data(pc_num).await.unwrap();
@@ -79,7 +81,6 @@ async fn main() {
                                 remote_server
                                     .open_remote_desktop(&start_time)
                                     .await;
-                                
                                 unsafe {RDP_COUNT -= 1;}
                             });
                             tasks.push(task);

@@ -74,7 +74,9 @@ impl RemoteServer {
 #[allow(dead_code)]
 pub fn get_pc_num() -> i32 {
     'user: loop {
-        print!("Enter remote PC's number IFOS-TE");
+        let remote_pre = env::var("Remote_SERVER_PREFIX")
+            .expect("Remote_SERVER_PREFIX is not set in .env");
+        print!("Enter remote PC's number {remote_pre}");
         io::stdout().flush().expect("Failed to flush the output.");
         let mut user_input = String::new();
         io::stdin()

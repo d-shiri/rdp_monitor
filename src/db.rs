@@ -190,12 +190,14 @@ pub async fn fetch_live_data(verbose: bool ) -> Result<(), Box<dyn std::error::E
             if data.is_empty(){
             color_print("No connection found. Go ahead and start a connection ;)\n", "green");
             } else {
+                let remote_pre = env::var("Remote_SERVER_PREFIX")
+                    .expect("Remote_SERVER_PREFIX is not set in .env");
                 println!("{}\t\t   {}","Name", "Remote PC");
                 println!("{}", "-".repeat(67));
                 for row in data {
                     println!(
-                        "{}\t   IFOS-TE{}",
-                        &row.full_name, &row.remote_pc
+                        "{}\t   {}{}",
+                        &row.full_name, &remote_pre, &row.remote_pc
                     );
                 }
                 println!("{} END {}", "-".repeat(31), "-".repeat(31));
@@ -235,7 +237,9 @@ pub async fn is_someone_connected(pc_num: i32) -> Result<bool, String>{
         }
         Ok(connected)
     } else {
-        Err(format!("Don't know if is_someone_connected to IFOS-TE{})\n{}", response.status(), pc_num))
+        let remote_pre = env::var("Remote_SERVER_PREFIX")
+            .expect("Remote_SERVER_PREFIX is not set in .env");
+        Err(format!("Don't know if is_someone_connected to {}{})\n{}", remote_pre, response.status(), pc_num))
     }
 }
 
@@ -289,6 +293,8 @@ pub async fn fetch_user_history(day: i32, other_user: Option<&str>) -> Result<()
         if data.is_empty(){
             color_print("No user history found!\n", "green");
         } else {
+            let remote_pre = env::var("Remote_SERVER_PREFIX")
+                .expect("Remote_SERVER_PREFIX is not set in .env");
             println!(
                 "{}\t   {}\t{}\t\t\t{}",
                 "User", "Remote PC", "Start Time", "End Time"
@@ -296,8 +302,8 @@ pub async fn fetch_user_history(day: i32, other_user: Option<&str>) -> Result<()
             println!("{}", "-".repeat(67));
             for row in data {
                 println!(
-                    "{}\t   IFOS-TE{}\t{}\t{}",
-                    &row.user_id, &row.remote_pc, &row.rdp_start_time, &row.rdp_end_time
+                    "{}\t   {}{}\t{}\t{}",
+                    &row.user_id, &remote_pre, &row.remote_pc, &row.rdp_start_time, &row.rdp_end_time
                 );
             }
             println!("{} END {}", "-".repeat(31), "-".repeat(31));
