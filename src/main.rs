@@ -8,6 +8,7 @@ use std::process::{Command, Stdio};
 use std::{env, thread};
 use dotenv::dotenv;
 use atty::Stream;
+use nct::RDP_COUNT;
 
 #[tokio::main]
 async fn main() {
@@ -31,21 +32,17 @@ async fn main() {
     let args: NBT = NBT::new();
     let mut tasks = vec![];
 
-    static mut RDP_ACTIVE: bool = false;
-
     if args.rdp {
-
         welcome();
         ctrlc::set_handler(move || {
             unsafe {
-                if RDP_ACTIVE == false {
+
+                if RDP_COUNT == 0 {
                     color_print("\rExiting NBT CLI Tool ...            ", "yellow");
-                    
                     std::process::exit(0);
                 } else {
-                    color_print("\nRDP session is active. Please close it before exiting.", "red");
+                    color_print("\nThere is 1 or more active RDP session(s). Please close all sessions before exiting.", "red");
                     thread::yield_now();
-
                 }
             }
 
@@ -77,30 +74,31 @@ async fn main() {
                             let remote_server = RemoteServer::new(pc_num);
                             remote_server.set_credentials();
                             let start_time = insert_data(pc_num).await.unwrap();
-                            unsafe {RDP_ACTIVE = true;}
                             // Spawn each connection attempt as a separate task
                             let task = tokio::spawn(async move {
                                 remote_server
                                     .open_remote_desktop(&start_time)
                                     .await;
-                                unsafe {RDP_ACTIVE = false;}
+                                
+                                unsafe {RDP_COUNT -= 1;}
                             });
                             tasks.push(task);
+                            unsafe{RDP_COUNT += 1;}
                         }
                     } else {
                         let remote_server = RemoteServer::new(pc_num);
                         remote_server.set_credentials();
                         let start_time = insert_data(pc_num).await.unwrap();
-                        unsafe {RDP_ACTIVE = true;}
                         // Spawn each connection attempt as a separate task
                         let task = tokio::spawn(async move {
                             remote_server
                                 .open_remote_desktop(&start_time)
                                 .await;
-                            unsafe {RDP_ACTIVE = false;}
-
+                            
+                            unsafe {RDP_COUNT -= 1;}
                         });
                         tasks.push(task);
+                        unsafe {RDP_COUNT += 1;}
                     }
                 }
                 Err(e) =>{

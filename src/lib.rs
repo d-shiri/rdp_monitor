@@ -5,3 +5,4 @@ pub mod remote_server;
 pub mod db;
 pub mod rdp_data;
 pub mod user_history_data;
+pub static mut RDP_COUNT: i32 = 0;
